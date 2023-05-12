@@ -8,7 +8,7 @@ const projects = [
   {
     name: "Nextjs-Crud",
     description:
-      "ThankfulThoughts is a web app that generates an appreciative sentence of something or someone you are thankful for.",
+      "Data retrieval from JSONplaceholder converted to CRUD",
     image: "/image-crud.png",
     github: "https://github.com/Zahman23/nextjs-crud",
     link: "https://nextjs-crud-srin-pbv55pz2k-zahman23.vercel.app/",
@@ -16,7 +16,7 @@ const projects = [
   {
     name: "Wanka Manufacture",
     description:
-      "Kator Family Photos is a photos and video digitization service in the LA area.",
+      "wanka is a web company Tekni manucfature",
     image: "/website-wanka.jpg",
     github: "https://github.com/Zahman23/wanka",
     link: "https://zahman23.github.io/wanka/",
