@@ -21,10 +21,10 @@ interface CommandState {
     setVisitedSections: (sections: string[]) => void;
 
     // Actions
-    scrollToSection: (section: string, refs: React.RefObject<HTMLDivElement>) => void;
-    handleBack: (refs: React.RefObject<HTMLDivElement>) => void;
+    scrollToSection: (section: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => void;
+    handleBack: (refs: Record<string, React.RefObject<HTMLDivElement>>) => void;
     handleInvalidCommand: (command: string) => void;
-    handleCommand: (command: string, refs: React.RefObject<HTMLDivElement  | null>) => void;
+    handleCommand: (command: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => void;
     updateBreadcrumbsFromScroll: () => void
 }
 
@@ -56,9 +56,9 @@ export const useCommandStore = create<CommandState>((set, get) => ({
     setVisitedSections: (sections) => set({visitedSections: sections}),
 
     // Actions
-    scrollToSection: (sectionName: string, refs: any) => {
+    scrollToSection: (sectionName: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => {
         console.log(refs)
-        const targetRef: React.RefObject<HTMLDivElement> = refs[`helpRef`]
+        const targetRef: React.RefObject<HTMLDivElement> = refs[`${sectionName}Ref`]
         if(targetRef?.current){
             targetRef.current.scrollIntoView({
                 behavior: 'smooth',
@@ -72,7 +72,7 @@ export const useCommandStore = create<CommandState>((set, get) => ({
             showError: false,
         }))
     },
-    handleBack: (refs: any) => {
+    handleBack: (refs: Record<string, React.RefObject<HTMLDivElement>>) => {
         const {scrollHistory} = get();
         if(scrollHistory.length > 1){
             const newHistory = scrollHistory.slice(0, -1)
@@ -107,7 +107,7 @@ export const useCommandStore = create<CommandState>((set, get) => ({
             showError: true,
         })
     },
-    handleCommand: (command: string, refs: any) => {
+    handleCommand: (command: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => {
         const {showHelp, scrollToSection, handleBack, handleInvalidCommand} = get()
 
         set({currentCommand: ''})
