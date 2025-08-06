@@ -1,5 +1,7 @@
 'use client'
 
+import { sectionOrder } from '@/data/data';
+import { Section } from 'lucide-react';
 import {create} from 'zustand'
 
 interface CommandState {
@@ -18,13 +20,13 @@ interface CommandState {
     breadcrumbs: string[];
     setBreadcrumbs: (crumbs: string[]) => void;
     visitedSections: string[];
-    setVisitedSections: (sections: string[]) => void;
+    setVisibleSections: (sections: string[]) => void;
 
     // Actions
-    scrollToSection: (section: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => void;
-    handleBack: (refs: Record<string, React.RefObject<HTMLDivElement>>) => void;
+    scrollToSection: (section: string, refs: Record<string, React.RefObject<HTMLDivElement | null>>) => void;
+    handleBack: (refs: Record<string, React.RefObject<HTMLDivElement | null>>) => void;
     handleInvalidCommand: (command: string) => void;
-    handleCommand: (command: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => void;
+    handleCommand: (command: string, refs: Record<string, React.RefObject<HTMLDivElement | null>>) => void;
     updateBreadcrumbsFromScroll: () => void
 }
 
@@ -53,17 +55,31 @@ export const useCommandStore = create<CommandState>((set, get) => ({
     setBreadcrumbs: (breadcrumbs: string[]) => set({breadcrumbs}),
 
     visitedSections: ["help"],
-    setVisitedSections: (sections) => set({visitedSections: sections}),
+   setVisibleSections: (newSections) => {
+    const current = get().visitedSections;
+
+    const isSame =
+      current.length === newSections.length &&
+      current.every((sec, i) => sec === newSections[i]);
+
+    if (isSame) return; // ⚠️ Jangan update kalau isinya sama, hindari infinite re-render
+
+    set({ visitedSections: newSections });
+  },
 
     // Actions
-    scrollToSection: (sectionName: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => {
-        console.log(refs)
-        const targetRef: React.RefObject<HTMLDivElement> = refs[`${sectionName}Ref`]
+    scrollToSection: (sectionName: string, refs: Record<string, React.RefObject<HTMLDivElement | null>>) => {
+        const targetRef: React.RefObject<HTMLDivElement | null> = refs[`${sectionName}Ref`]
         if(targetRef?.current){
-            targetRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            window.scrollTo({
+                top: targetRef.current.offsetTop - 38, // Adjust for fixed navbar
+                behavior: 'smooth'
             })
+            // targetRef.current.scrollIntoView({
+                
+            //     behavior: 'smooth',
+            //     block: 'start'
+            // })
         }
         set((state) => ({
             scrollHistory: [...state.scrollHistory, sectionName],
@@ -72,13 +88,13 @@ export const useCommandStore = create<CommandState>((set, get) => ({
             showError: false,
         }))
     },
-    handleBack: (refs: Record<string, React.RefObject<HTMLDivElement>>) => {
+    handleBack: (refs: Record<string, React.RefObject<HTMLDivElement | null>>) => {
         const {scrollHistory} = get();
         if(scrollHistory.length > 1){
             const newHistory = scrollHistory.slice(0, -1)
             const previousSection = newHistory[newHistory.length - 1];
-            
-            const targetRef: React.RefObject<HTMLDivElement> = refs[`${previousSection}Ref`]
+
+            const targetRef: React.RefObject<HTMLDivElement | null> = refs[`${previousSection}Ref`]
             if(targetRef?.current){
                 targetRef.current.scrollIntoView({
                     behavior: 'smooth',
@@ -107,7 +123,7 @@ export const useCommandStore = create<CommandState>((set, get) => ({
             showError: true,
         })
     },
-    handleCommand: (command: string, refs: Record<string, React.RefObject<HTMLDivElement>>) => {
+    handleCommand: (command: string, refs: Record<string, React.RefObject<HTMLDivElement | null>>) => {
         const {showHelp, scrollToSection, handleBack, handleInvalidCommand} = get()
 
         set({currentCommand: ''})
@@ -140,29 +156,31 @@ export const useCommandStore = create<CommandState>((set, get) => ({
                     showError: true,
                 })
             }
-        }else if(command === ''){
+        }else if(command !== ''){
             handleInvalidCommand(command)
         }
 
     },
     updateBreadcrumbsFromScroll: () => {
-        const {visitedSections} = get()
-        const sectionOrder = ["help", "about", "projects", "experience", "skills", "contact"];
+  const {visitedSections} = get()
+  
 
-        let breadcrumbPath: string[] = [];
+  const orderedBreadcrumbs = [];
 
-        for(const section of sectionOrder){
-            if(visitedSections.includes(section)){
-                breadcrumbPath.push(section)
-            }else{
-                break;
-            }
-        }
-
-        if(breadcrumbPath.length > 1 && breadcrumbPath[0] === 'help'){
-            breadcrumbPath = breadcrumbPath.slice(1)
-        }
-
-        set({breadcrumbs: breadcrumbPath})
+  for (const currentSection of sectionOrder) {
+      if (visitedSections.includes(currentSection)) {
+      orderedBreadcrumbs.push(currentSection);
+    } else {
+      break;
     }
+  }
+
+  const current = get().breadcrumbs;
+  const isDifferent = JSON.stringify(current) !== JSON.stringify(orderedBreadcrumbs);
+//   console.log("Breadcrumbs Data", orderedBreadcrumbs);
+  if (isDifferent) {
+    set({ breadcrumbs: orderedBreadcrumbs });
+  }
+}
+
 }))
