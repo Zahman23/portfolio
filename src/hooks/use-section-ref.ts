@@ -13,9 +13,9 @@ export const useSectionRef = () => {
     return {
         helpRef,
         aboutRef,
-        projectsRef,
-        experienceRef,
         skillsRef,
+        experienceRef,
+        projectsRef,
         contactRef
     }
 }

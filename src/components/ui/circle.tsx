@@ -9,7 +9,7 @@ interface CircleProps {
 
 const Circle = ({ size, color}: CircleProps) => {
   return (
-    <div className={`w-${size} h-${size} rounded-full bg-${color}-500`}></div>
+    <div className={`w-${size} h-${size} rounded-full ${color} bg-green-900 `}></div>
   )
 }
 
